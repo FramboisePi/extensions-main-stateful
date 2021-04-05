@@ -1,6 +1,7 @@
 {
   "name": "extensions-stateful",
   "version": "1.0.0",
+  "repositoryName":"Extensions Stateful",
   "description": "Stateful sources for Paperback",
   "scripts": {
     "start": "tsc && node dist/api.js",
