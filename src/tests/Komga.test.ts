@@ -10,17 +10,23 @@ describe("Komga Tests", function () {
   var chaiAsPromised = require("chai-as-promised");
   chai.use(chaiAsPromised);
 
-
+  const serverAddress = "https://demo.komga.org"
+  const username = "demo@komga.org"
+  const password = "komga-demo"
+  
   // THIS IS THE NEW BIT - By doing this, any retrieval done in your source should properly retrieve these values
   before(function() {
     // This will run before ANY test. Set your state values here
-    source.stateManager.store("serverAddress", "http://192.168.0.23:8081") // Or whatever your endpoint is
-    source.stateManager.store("serverUsername", "demo@komga.org")
-    source.stateManager.store("serverPassword", "komga-demo")
+    source.stateManager.store("serverAddress", serverAddress) // Or whatever your endpoint is
+    source.stateManager.store("serverUsername", username)
+    source.stateManager.store("serverPassword", password)
+
+    source.stateManager.store("authorization", "Basic " + Buffer.from(username + ":" + password, 'binary').toString('base64'))
+    source.stateManager.store("komgaAPI", serverAddress + (serverAddress.slice(-1) === "/" ? "api/v1" : "/api/v1"))
   });
 
-  //var mangaId = "63";
-  var mangaId = "0451Q4Q58E40R";
+  const mangaId = "63";
+  const searchTitle = "Space Adventures";
 
   it("Retrieve Manga Details", async () => {
     let details = await wrapper.getMangaDetails(source, mangaId);
@@ -75,8 +81,7 @@ describe("Komga Tests", function () {
 
   it("Testing search", async () => {
     let testSearch = createSearchRequest({
-      title: "Kimi",
-      // title: "Space Adventures",
+      title: searchTitle,
     });
 
     let search = await wrapper.searchRequest(source, testSearch);
