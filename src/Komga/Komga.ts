@@ -92,8 +92,6 @@ export class KomgaRequestInterceptor implements RequestInterceptor {
     // Thus we only inject an authorizationString if node are defined in the request
     if (request.headers.authorization === undefined) {
       request.headers.authorization = await this.getAuthorizationString()
-      console.log(`we change the autorization for  ${request.headers.authorization}`)
-
     }
     
     return request
