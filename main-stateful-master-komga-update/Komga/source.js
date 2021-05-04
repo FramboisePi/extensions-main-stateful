@@ -2347,7 +2347,6 @@ class KomgaRequestInterceptor {
     getAuthorizationString() {
         return __awaiter(this, void 0, void 0, function* () {
             const authorizationString = yield this.stateManager.retrieve("authorization");
-            console.log(`Getting authorizationString : ${authorizationString}`);
             if (authorizationString === null) {
                 throw new Error("Unset credential in source settings");
             }
@@ -2361,11 +2360,18 @@ class KomgaRequestInterceptor {
     }
     interceptRequest(request) {
         return __awaiter(this, void 0, void 0, function* () {
-            const authorizationString = yield this.getAuthorizationString();
             if (request.headers === undefined) {
                 request.headers = {};
             }
-            request.headers.authorization = authorizationString;
+            // We mustn't call this.getAuthorizationString() for the stateful submission request.
+            // This procedure indeed catchs the request used to check user credentials
+            // which can happen before an authorizationString is saved,
+            // raising an error in getAuthorizationString when we check for its existence
+            // Thus we only inject an authorizationString if node are defined in the request
+            if (request.headers.authorization === undefined) {
+                request.headers.authorization = yield this.getAuthorizationString();
+                console.log(`we change the autorization for  ${request.headers.authorization}`);
+            }
             return request;
         });
     }
@@ -2389,7 +2395,6 @@ class Komga extends paperback_extensions_common_1.Source {
     getAuthorizationString() {
         return __awaiter(this, void 0, void 0, function* () {
             const authorizationString = yield this.stateManager.retrieve("authorization");
-            console.log(`Getting authorizationString : ${authorizationString}`);
             if (authorizationString === null) {
                 throw new Error("Unset credential in source settings");
             }
@@ -2399,7 +2404,6 @@ class Komga extends paperback_extensions_common_1.Source {
     getKomgaAPI() {
         return __awaiter(this, void 0, void 0, function* () {
             const komgaAPI = yield this.stateManager.retrieve("komgaAPI");
-            console.log(`Getting komgaAPI : ${komgaAPI}`);
             if (komgaAPI === null) {
                 throw new Error("Unset server URL in source settings");
             }
@@ -2415,7 +2419,6 @@ class Komga extends paperback_extensions_common_1.Source {
             const request = createRequestObject({
                 url: `${komgaAPI}/series/${mangaId}/`,
                 method: "GET",
-                headers: { authorization: yield this.getAuthorizationString() }
             });
             const response = yield this.requestManager.schedule(request, 1);
             const result = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
@@ -2463,7 +2466,6 @@ class Komga extends paperback_extensions_common_1.Source {
                 url: `${komgaAPI}/series/${mangaId}/books`,
                 param: "?unpaged=true&media_status=READY",
                 method: "GET",
-                headers: { authorization: yield this.getAuthorizationString() }
             });
             const response = yield this.requestManager.schedule(request, 1);
             const result = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
@@ -2472,7 +2474,6 @@ class Komga extends paperback_extensions_common_1.Source {
             const requestSerie = createRequestObject({
                 url: `${komgaAPI}/series/${mangaId}/`,
                 method: "GET",
-                headers: { authorization: yield this.getAuthorizationString() }
             });
             const responseSerie = yield this.requestManager.schedule(requestSerie, 1);
             const resultSerie = typeof responseSerie.data === "string" ? JSON.parse(responseSerie.data) : responseSerie.data;
@@ -2493,11 +2494,9 @@ class Komga extends paperback_extensions_common_1.Source {
     getChapterDetails(mangaId, chapterId) {
         return __awaiter(this, void 0, void 0, function* () {
             const komgaAPI = yield this.getKomgaAPI();
-            const authorizationString = yield this.getAuthorizationString();
             const request = createRequestObject({
                 url: `${komgaAPI}/books/${chapterId}/pages`,
                 method: "GET",
-                headers: { authorization: authorizationString }
             });
             const data = yield this.requestManager.schedule(request, 1);
             const result = typeof data.data === "string" ? JSON.parse(data.data) : data.data;
@@ -2514,7 +2513,6 @@ class Komga extends paperback_extensions_common_1.Source {
             const serieRequest = createRequestObject({
                 url: `${komgaAPI}/series/${mangaId}/`,
                 method: "GET",
-                headers: { authorization: authorizationString }
             });
             const serieResponse = yield this.requestManager.schedule(serieRequest, 1);
             const serieResult = typeof serieResponse.data === "string" ? JSON.parse(serieResponse.data) : serieResponse.data;
@@ -2552,7 +2550,6 @@ class Komga extends paperback_extensions_common_1.Source {
                 url: `${komgaAPI}/series`,
                 method: "GET",
                 param: paramsString,
-                headers: { authorization: yield this.getAuthorizationString() }
             });
             const data = yield this.requestManager.schedule(request, 1);
             const result = typeof data.data === "string" ? JSON.parse(data.data) : data.data;
@@ -2576,7 +2573,6 @@ class Komga extends paperback_extensions_common_1.Source {
     getHomePageSections(sectionCallback) {
         return __awaiter(this, void 0, void 0, function* () {
             const komgaAPI = yield this.getKomgaAPI();
-            const authorizationString = yield this.getAuthorizationString();
             // The source define two homepage sections: new and latest
             const sections = [
                 createHomeSection({
@@ -2598,7 +2594,6 @@ class Komga extends paperback_extensions_common_1.Source {
                     url: `${komgaAPI}/series/${section.id}`,
                     param: "?page=0&size=20",
                     method: "GET",
-                    headers: { authorization: authorizationString },
                 });
                 // Get the section data
                 promises.push(this.requestManager.schedule(request, 1).then(data => {
@@ -2624,13 +2619,11 @@ class Komga extends paperback_extensions_common_1.Source {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const komgaAPI = yield this.getKomgaAPI();
-            const authorizationString = yield this.getAuthorizationString();
             let page = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.page) !== null && _a !== void 0 ? _a : 0;
             const request = createRequestObject({
                 url: `${komgaAPI}/series/${homepageSectionId}`,
                 param: `?page=${page}&size=${PAGE_SIZE}`,
                 method: "GET",
-                headers: { authorization: authorizationString },
             });
             const data = yield this.requestManager.schedule(request, 1);
             const result = typeof data.data === "string" ? JSON.parse(data.data) : data.data;
@@ -2654,7 +2647,6 @@ class Komga extends paperback_extensions_common_1.Source {
     filterUpdatedManga(mangaUpdatesFoundCallback, time, ids) {
         return __awaiter(this, void 0, void 0, function* () {
             const komgaAPI = yield this.getKomgaAPI();
-            const authorizationString = yield this.getAuthorizationString();
             // We make requests of PAGE_SIZE titles to `series/updated/` until we got every titles 
             // or we got a title which `lastModified` metadata is older than `time`
             let page = 0;
@@ -2665,7 +2657,6 @@ class Komga extends paperback_extensions_common_1.Source {
                     url: `${komgaAPI}/series/updated/`,
                     param: `?page=${page}&size=${PAGE_SIZE}`,
                     method: "GET",
-                    headers: { authorization: authorizationString }
                 });
                 const data = yield this.requestManager.schedule(request, 1);
                 let result = typeof data.data === "string" ? JSON.parse(data.data) : data.data;
@@ -2751,6 +2742,7 @@ class Komga extends paperback_extensions_common_1.Source {
                 url: `${komgaAPI}/series/`,
                 param: "?size=1",
                 method: "GET",
+                incognito: true,
                 headers: { authorization: authorization }
             });
             var responseStatus = undefined;
