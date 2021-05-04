@@ -2308,7 +2308,7 @@ exports.Komga = exports.KomgaRequestInterceptor = exports.parseMangaStatus = exp
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Languages_1 = require("./Languages");
 exports.KomgaInfo = {
-    version: "1.1.2",
+    version: "1.1.3",
     name: "Komga",
     icon: "icon.png",
     author: "Lemon",
