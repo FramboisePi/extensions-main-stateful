@@ -69,7 +69,7 @@ export class KomgaRequestInterceptor implements RequestInterceptor {
     const authorizationString = await this.stateManager.retrieve("authorization")
 
     if (authorizationString === null) {
-      throw new Error("Unset credential in source settings")
+      throw new Error("Unset credentials in source settings")
     }
     return authorizationString
   }
@@ -89,7 +89,7 @@ export class KomgaRequestInterceptor implements RequestInterceptor {
     // This procedure indeed catchs the request used to check user credentials
     // which can happen before an authorizationString is saved,
     // raising an error in getAuthorizationString when we check for its existence
-    // Thus we only inject an authorizationString if node are defined in the request
+    // Thus we only inject an authorizationString if none are defined in the request
     if (request.headers.authorization === undefined) {
       request.headers.authorization = await this.getAuthorizationString()
     }
@@ -112,7 +112,7 @@ export class Komga extends Source {
     const authorizationString = await this.stateManager.retrieve("authorization")
 
     if (authorizationString === null) {
-      throw new Error("Unset credential in source settings")
+      throw new Error("Unset credentials in source settings")
     }
     return authorizationString
   }
