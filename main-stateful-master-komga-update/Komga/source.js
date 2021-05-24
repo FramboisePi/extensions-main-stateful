@@ -2348,7 +2348,7 @@ class KomgaRequestInterceptor {
         return __awaiter(this, void 0, void 0, function* () {
             const authorizationString = yield this.stateManager.retrieve("authorization");
             if (authorizationString === null) {
-                throw new Error("Unset credential in source settings");
+                throw new Error("Unset credentials in source settings");
             }
             return authorizationString;
         });
@@ -2367,7 +2367,7 @@ class KomgaRequestInterceptor {
             // This procedure indeed catchs the request used to check user credentials
             // which can happen before an authorizationString is saved,
             // raising an error in getAuthorizationString when we check for its existence
-            // Thus we only inject an authorizationString if node are defined in the request
+            // Thus we only inject an authorizationString if none are defined in the request
             if (request.headers.authorization === undefined) {
                 request.headers.authorization = yield this.getAuthorizationString();
             }
@@ -2395,7 +2395,7 @@ class Komga extends paperback_extensions_common_1.Source {
         return __awaiter(this, void 0, void 0, function* () {
             const authorizationString = yield this.stateManager.retrieve("authorization");
             if (authorizationString === null) {
-                throw new Error("Unset credential in source settings");
+                throw new Error("Unset credentials in source settings");
             }
             return authorizationString;
         });
