@@ -2105,7 +2105,7 @@ __exportStar(require("./base"), exports);
 __exportStar(require("./models"), exports);
 __exportStar(require("./APIWrapper"), exports);
 
-},{"./APIWrapper":2,"./base":6,"./models":31}],8:[function(require,module,exports){
+},{"./APIWrapper":2,"./base":6,"./models":44}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
@@ -2114,6 +2114,62 @@ arguments[4][8][0].apply(exports,arguments)
 },{"dup":8}],10:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
 },{"dup":8}],11:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],12:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],13:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],14:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],15:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],16:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],17:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],18:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],19:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],20:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],21:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],22:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],23:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],24:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],25:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./Button"), exports);
+__exportStar(require("./Form"), exports);
+__exportStar(require("./Header"), exports);
+__exportStar(require("./InputField"), exports);
+__exportStar(require("./Label"), exports);
+__exportStar(require("./Link"), exports);
+__exportStar(require("./MultilineLabel"), exports);
+__exportStar(require("./NavigationButton"), exports);
+__exportStar(require("./OAuthButton"), exports);
+__exportStar(require("./Section"), exports);
+__exportStar(require("./Select"), exports);
+__exportStar(require("./Switch"), exports);
+__exportStar(require("./WebViewButton"), exports);
+__exportStar(require("./FormRow"), exports);
+
+},{"./Button":11,"./Form":12,"./FormRow":13,"./Header":14,"./InputField":15,"./Label":16,"./Link":17,"./MultilineLabel":18,"./NavigationButton":19,"./OAuthButton":20,"./Section":21,"./Select":22,"./Switch":23,"./WebViewButton":24}],26:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HomeSectionType = void 0;
@@ -2125,7 +2181,7 @@ var HomeSectionType;
     HomeSectionType["featured"] = "featured";
 })(HomeSectionType = exports.HomeSectionType || (exports.HomeSectionType = {}));
 
-},{}],12:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LanguageCode = void 0;
@@ -2173,7 +2229,7 @@ var LanguageCode;
     LanguageCode["VIETNAMESE"] = "vn";
 })(LanguageCode = exports.LanguageCode || (exports.LanguageCode = {}));
 
-},{}],13:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MangaStatus = void 0;
@@ -2182,29 +2238,31 @@ var MangaStatus;
     MangaStatus[MangaStatus["ONGOING"] = 1] = "ONGOING";
     MangaStatus[MangaStatus["COMPLETED"] = 0] = "COMPLETED";
     MangaStatus[MangaStatus["UNKNOWN"] = 2] = "UNKNOWN";
+    MangaStatus[MangaStatus["ABANDONED"] = 3] = "ABANDONED";
+    MangaStatus[MangaStatus["HIATUS"] = 4] = "HIATUS";
 })(MangaStatus = exports.MangaStatus || (exports.MangaStatus = {}));
 
-},{}],14:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],15:[function(require,module,exports){
+},{"dup":8}],30:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],16:[function(require,module,exports){
+},{"dup":8}],31:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],17:[function(require,module,exports){
+},{"dup":8}],32:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],18:[function(require,module,exports){
+},{"dup":8}],33:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],19:[function(require,module,exports){
+},{"dup":8}],34:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],20:[function(require,module,exports){
+},{"dup":8}],35:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],21:[function(require,module,exports){
+},{"dup":8}],36:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],22:[function(require,module,exports){
+},{"dup":8}],37:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],23:[function(require,module,exports){
+},{"dup":8}],38:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],24:[function(require,module,exports){
+},{"dup":8}],39:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContentRating = void 0;
@@ -2218,19 +2276,9 @@ var ContentRating;
     ContentRating["ADULT"] = "ADULT";
 })(ContentRating = exports.ContentRating || (exports.ContentRating = {}));
 
-},{}],25:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SourceMenuItemType = void 0;
-var SourceMenuItemType;
-(function (SourceMenuItemType) {
-    SourceMenuItemType["LINK"] = "link";
-    SourceMenuItemType["FORM"] = "form";
-})(SourceMenuItemType = exports.SourceMenuItemType || (exports.SourceMenuItemType = {}));
-
-},{}],26:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],27:[function(require,module,exports){
+},{"dup":8}],41:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagType = void 0;
@@ -2248,13 +2296,11 @@ var TagType;
     TagType["RED"] = "danger";
 })(TagType = exports.TagType || (exports.TagType = {}));
 
-},{}],28:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],29:[function(require,module,exports){
+},{"dup":8}],43:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],30:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"dup":8}],31:[function(require,module,exports){
+},{"dup":8}],44:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2286,12 +2332,11 @@ __exportStar(require("./RequestHeaders"), exports);
 __exportStar(require("./SourceInfo"), exports);
 __exportStar(require("./TrackObject"), exports);
 __exportStar(require("./OAuth"), exports);
-__exportStar(require("./UserForm"), exports);
 __exportStar(require("./SourceStateManager"), exports);
-__exportStar(require("./SourceMenu"), exports);
 __exportStar(require("./RequestInterceptor"), exports);
+__exportStar(require("./DynamicUI"), exports);
 
-},{"./Chapter":8,"./ChapterDetails":9,"./Constants":10,"./HomeSection":11,"./Languages":12,"./Manga":13,"./MangaTile":14,"./MangaUpdate":15,"./OAuth":16,"./PagedResults":17,"./RequestHeaders":18,"./RequestInterceptor":19,"./RequestManager":20,"./RequestObject":21,"./ResponseObject":22,"./SearchRequest":23,"./SourceInfo":24,"./SourceMenu":25,"./SourceStateManager":26,"./SourceTag":27,"./TagSection":28,"./TrackObject":29,"./UserForm":30}],32:[function(require,module,exports){
+},{"./Chapter":8,"./ChapterDetails":9,"./Constants":10,"./DynamicUI":25,"./HomeSection":26,"./Languages":27,"./Manga":28,"./MangaTile":29,"./MangaUpdate":30,"./OAuth":31,"./PagedResults":32,"./RequestHeaders":33,"./RequestInterceptor":34,"./RequestManager":35,"./RequestObject":36,"./ResponseObject":37,"./SearchRequest":38,"./SourceInfo":39,"./SourceStateManager":40,"./SourceTag":41,"./TagSection":42,"./TrackObject":43}],45:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -2571,7 +2616,19 @@ class Komga extends paperback_extensions_common_1.Source {
     }
     getHomePageSections(sectionCallback) {
         return __awaiter(this, void 0, void 0, function* () {
-            const komgaAPI = yield this.getKomgaAPI();
+            // We won't use `await this.getKomgaAPI()` as we do not want to throw an error on
+            // the homepage when settings are not set
+            const komgaAPI = yield this.stateManager.retrieve("komgaAPI");
+            if (komgaAPI === null) {
+                // Server unset in source settings
+                const section = createHomeSection({
+                    id: 'unset',
+                    title: 'Server unset in source settings',
+                    view_more: false,
+                });
+                sectionCallback(section);
+                return;
+            }
             // The source define two homepage sections: new and latest
             const sections = [
                 createHomeSection({
@@ -2691,42 +2748,104 @@ class Komga extends paperback_extensions_common_1.Source {
     */
     getSourceMenu() {
         return __awaiter(this, void 0, void 0, function* () {
-            return Promise.resolve(createSourceMenu({
-                items: [
-                    createSourceMenuItem({
-                        id: "serverSettings",
-                        label: "Server Settings",
-                        type: paperback_extensions_common_1.SourceMenuItemType.FORM
-                    })
-                ]
+            return Promise.resolve(createSection({
+                id: "sourceSettings",
+                header: "Source Settings",
+                footer: "Footer",
+                rows: () => {
+                    return Promise.resolve([
+                        createLabel({
+                            id: "m",
+                            label: "mmm",
+                            value: ""
+                        }),
+                        createNavigationButton({
+                            label: "Server Settings",
+                            id: "serverSettings",
+                            value: "",
+                            form: createForm({
+                                //@ts-ignore
+                                onSubmit: (values) => {
+                                    console.log("saving");
+                                    console.log(JSON.stringify(values, null, 2));
+                                },
+                                sections: () => Promise.resolve([
+                                    createSection({
+                                        id: "information",
+                                        header: "Komga",
+                                        rows: () => {
+                                            return Promise.resolve([
+                                                createMultilineLabel({
+                                                    label: "Enter your Komga server credentials\nTo test the source, a demonstration server is available on:\nhttps://komga.org/guides/#demo",
+                                                    value: "",
+                                                    id: "description"
+                                                })
+                                            ]);
+                                        }
+                                    }),
+                                    createSection({
+                                        id: "serverSettings",
+                                        header: "Server Settings",
+                                        rows: () => {
+                                            return Promise.resolve([
+                                                createInputField({
+                                                    id: 'serverAddress',
+                                                    label: 'Server URL',
+                                                    placeholder: 'http://127.0.0.1:8080',
+                                                    value: "test",
+                                                    maskInput: false,
+                                                }),
+                                                createInputField({
+                                                    id: 'serverUsername',
+                                                    label: 'Username',
+                                                    placeholder: 'AnimeLover420',
+                                                    value: "",
+                                                    maskInput: false,
+                                                }),
+                                                createInputField({
+                                                    id: 'serverPassword',
+                                                    label: 'Password',
+                                                    placeholder: 'Some Super Secret Password',
+                                                    value: "",
+                                                    maskInput: true,
+                                                }),
+                                            ]);
+                                        }
+                                    }),
+                                ])
+                            })
+                        })
+                    ]);
+                }
             }));
         });
     }
-    getSourceMenuItemForm(itemId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let objects = [
-                createTextFieldObject({
-                    id: 'serverAddress',
-                    label: 'Server URL',
-                    placeholderText: 'http://127.0.0.1:8080',
-                    value: yield this.stateManager.retrieve('serverAddress')
-                }),
-                createTextFieldObject({
-                    id: 'serverUsername',
-                    label: 'Username',
-                    placeholderText: 'AnimeLover420',
-                    value: yield this.stateManager.retrieve('serverUsername')
-                }),
-                createTextFieldObject({
-                    id: 'serverPassword',
-                    label: 'Password',
-                    placeholderText: 'Some Super Secret Password',
-                    value: yield this.stateManager.retrieve('serverPassword')
-                })
-            ];
-            return createUserForm({ formElements: objects });
-        });
+    /*
+    async getSourceMenuItemForm(itemId: string): Promise<UserForm> {
+      let objects: FormObject[] = [
+        createTextFieldObject({
+          id: 'serverAddress',
+          label: 'Server URL',
+          placeholderText: 'http://127.0.0.1:8080',
+          value: await this.stateManager.retrieve('serverAddress')
+        }),
+        createTextFieldObject({
+          id: 'serverUsername',
+          label: 'Username',
+          placeholderText: 'AnimeLover420',
+          value: await this.stateManager.retrieve('serverUsername')
+        }),
+        createTextFieldObject({
+          id: 'serverPassword',
+          label: 'Password',
+          placeholderText: 'Some Super Secret Password',
+          value: await this.stateManager.retrieve('serverPassword')
+        })
+      ]
+  
+      return createUserForm({formElements: objects})
     }
+    */
     submitSourceMenuItemForm(itemId, form) {
         return __awaiter(this, void 0, void 0, function* () {
             var promises = [];
@@ -2779,7 +2898,7 @@ class Komga extends paperback_extensions_common_1.Source {
 exports.Komga = Komga;
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./Languages":33,"buffer":3,"paperback-extensions-common":7}],33:[function(require,module,exports){
+},{"./Languages":46,"buffer":3,"paperback-extensions-common":7}],46:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.reverseLangCode = void 0;
@@ -2827,5 +2946,5 @@ exports.reverseLangCode = {
     'vn': paperback_extensions_common_1.LanguageCode.VIETNAMESE
 };
 
-},{"paperback-extensions-common":7}]},{},[32])(32)
+},{"paperback-extensions-common":7}]},{},[45])(45)
 });
