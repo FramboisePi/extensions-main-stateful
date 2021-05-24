@@ -325,8 +325,22 @@ export class Komga extends Source {
   }
 
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
-    
-    const komgaAPI = await this.getKomgaAPI()
+
+
+    // We won't use `await this.getKomgaAPI()` as we do not want to throw an error on
+    // the homepage when settings are not set
+    const komgaAPI = await this.stateManager.retrieve("komgaAPI")
+
+    if (komgaAPI === null) {
+      // Server unset in source settings
+      const section = createHomeSection({
+        id: 'unset',
+        title: 'Server unset in source settings',
+        view_more: false,
+      })
+      sectionCallback(section)
+      return
+    }
 
     // The source define two homepage sections: new and latest
     const sections = [
@@ -468,17 +482,96 @@ export class Komga extends Source {
   */
 
   async getSourceMenu(): Promise<SourceMenu> {
-    return Promise.resolve(createSourceMenu({
-       items: [
-         createSourceMenuItem({
-           id: "serverSettings",
-           label: "Server Settings",
-           type: SourceMenuItemType.FORM
-         })
-       ]
+    return Promise.resolve(createSection({
+      id: "sourceSettings",
+      header: "Source Settings",
+      footer: "Footer",
+      rows: () => {
+        return Promise.resolve([
+          createLabel({
+            id:"m",
+            label:"mmm",
+            value: ""
+          }),
+          createNavigationButton({
+            label: "Server Settings",
+            id: "serverSettings",
+            value: "",
+            form: createForm({
+              //@ts-ignore
+              onSubmit: (values: Record<string, any>) => {
+                console.log("saving")
+                console.log(JSON.stringify(values, null, 2));
+              },
+
+              
+              sections: () => Promise.resolve([
+                createSection({
+                  id: "information",
+                  header: "Komga",
+                  rows: () => {
+                    return Promise.resolve([
+                      createMultilineLabel({
+                        label: "Enter your Komga server credentials\nTo test the source, a demonstration server is available on:\nhttps://komga.org/guides/#demo",
+                        value: "",
+                        id: "description"
+                      })
+                    ])
+                  }
+                }),
+
+                createSection({
+                  id: "serverSettings",
+                  header: "Server Settings",
+                  rows: () => {
+                    return Promise.resolve([
+                      createInputField({
+                        id: 'serverAddress',
+                        label: 'Server URL',
+                        placeholder: 'http://127.0.0.1:8080',
+                        value: "test",
+                        maskInput: false,
+                      }),
+                      createInputField({
+                        id: 'serverUsername',
+                        label: 'Username',
+                        placeholder: 'AnimeLover420',
+                        value: "",
+                        maskInput: false,
+                      }),
+                      createInputField({
+                        id: 'serverPassword',
+                        label: 'Password',
+                        placeholder: 'Some Super Secret Password',
+                        value: "",
+                        maskInput: true,
+                      }),
+                      
+                      /*
+                      createLink({
+                        label: "komga",
+                        id: "lin",
+                        value: "value"
+                      })
+                      */
+                    ])
+                  }
+                })
+
+
+                ,
+
+
+                
+              ])
+            })
+          })
+        ])
+      }
     }))
   }
 
+  /*
   async getSourceMenuItemForm(itemId: string): Promise<UserForm> {
     let objects: FormObject[] = [
       createTextFieldObject({
@@ -503,6 +596,7 @@ export class Komga extends Source {
 
     return createUserForm({formElements: objects})
   }
+  */
 
   async submitSourceMenuItemForm(itemId: string, form: any) {
     var promises: Promise<void>[] = []
