@@ -5,30 +5,41 @@ import {
   ChapterDetails,
   HomeSection,
   SearchRequest,
-  LanguageCode,
   MangaStatus,
   MangaUpdates,
   PagedResults,
   FormObject,
   SourceInfo,
-  RequestHeaders,
   TagSection,
   UserForm,
   MangaTile,
   SourceMenu,
-  SourceMenuItemType
+  SourceMenuItemType,
+  TagType,
+  ContentRating,
+  RequestInterceptor,
+  Request,
+  Response
 } from "paperback-extensions-common"
 
+import {reverseLangCode} from "./Languages"
+
 export const KomgaInfo: SourceInfo = {
-  version: "1.1.2",
+  version: "1.1.3",
   name: "Komga",
   icon: "icon.png",
   author: "Lemon",
   authorWebsite: "https://github.com/FramboisePi",
-  description: "Extension that pulls manga from Komga demo server",
+  description: "Extension that pulls manga from a Komga server",
   //language: ,
-  hentaiSource: false,
-  websiteBaseURL: "https://komga.org"
+  contentRating: ContentRating.EVERYONE,
+  websiteBaseURL: "https://komga.org",
+  sourceTags: [
+    {
+        text: "Self hosted",
+        type: TagType.RED
+    }
+]
 }
 
 const SUPPORTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"]
@@ -39,7 +50,7 @@ const PAGE_SIZE = 40
 export const parseMangaStatus = (komgaStatus: string) => {
   switch (komgaStatus) {
     case "ENDED":
-      return MangaStatus.COMPLETED  
+      return MangaStatus.COMPLETED
     case "ONGOING":
       return MangaStatus.ONGOING
     case "ABANDONED":
@@ -50,25 +61,77 @@ export const parseMangaStatus = (komgaStatus: string) => {
   return MangaStatus.ONGOING
 }
 
-export class Komga extends Source {
 
-  async getAuthorizationString(): Promise<string>{
-    const username = await this.stateManager.retrieve("serverUsername")
-    const password = await this.stateManager.retrieve("serverPassword")
+export class KomgaRequestInterceptor implements RequestInterceptor {
+  stateManager = createSourceStateManager({})
 
-    return "Basic " + Buffer.from(username + ":" + password, 'binary').toString('base64')
+  async getAuthorizationString(): Promise<string>{    
+    const authorizationString = await this.stateManager.retrieve("authorization")
+
+    if (authorizationString === null) {
+      throw new Error("Unset credentials in source settings")
+    }
+    return authorizationString
   }
 
-  async getKomgaAPI(): Promise<string>{
-    const serverAddress = await this.stateManager.retrieve("serverAddress")
+
+  async interceptResponse(response: Response): Promise<Response> {
+    return response
+  }
+
+  async interceptRequest(request: Request): Promise<Request> {
+
+    if (request.headers === undefined) {
+      request.headers = {}
+    }
+
+    // We mustn't call this.getAuthorizationString() for the stateful submission request.
+    // This procedure indeed catchs the request used to check user credentials
+    // which can happen before an authorizationString is saved,
+    // raising an error in getAuthorizationString when we check for its existence
+    // Thus we only inject an authorizationString if none are defined in the request
+    if (request.headers.authorization === undefined) {
+      request.headers.authorization = await this.getAuthorizationString()
+    }
+    
+    return request
+  }
+}
+
+
+export class Komga extends Source {
+
+  createAuthorizationString(username: String, password: String) {
+    return "Basic " + Buffer.from(username + ":" + password, 'binary').toString('base64')
+  }
+  createKomgaAPI(serverAddress: String){
     return serverAddress + (serverAddress.slice(-1) === "/" ? "api/v1" : "/api/v1")
   }
 
-  async globalRequestHeaders(): Promise<RequestHeaders> { 
-    return {
-      authorization: await this.getAuthorizationString()
+  async getAuthorizationString(): Promise<string>{
+    const authorizationString = await this.stateManager.retrieve("authorization")
+
+    if (authorizationString === null) {
+      throw new Error("Unset credentials in source settings")
     }
+    return authorizationString
   }
+
+  async getKomgaAPI(): Promise<string>{
+    const komgaAPI = await this.stateManager.retrieve("komgaAPI")
+
+    if (komgaAPI === null) {
+      throw new Error("Unset server URL in source settings")
+    }
+    return komgaAPI
+  }
+
+  stateManager = createSourceStateManager({})
+
+  requestManager = createRequestManager({
+    requestsPerSecond: 4,
+    interceptor: new KomgaRequestInterceptor()
+  })
 
   async getMangaDetails(mangaId: string): Promise<Manga> {
     /*
@@ -76,10 +139,9 @@ export class Komga extends Source {
      */
     const komgaAPI = await this.getKomgaAPI()
 
-    let request = createRequestObject({
+    const request = createRequestObject({
       url: `${komgaAPI}/series/${mangaId}/`,
       method: "GET",
-      headers: {authorization: await this.getAuthorizationString()}
     })
 
     const response = await this.requestManager.schedule(request, 1)
@@ -95,7 +157,7 @@ export class Komga extends Source {
     let authors: string[] = []
     let artists: string[] = []
 
-    // Other are ignored
+    // Additional roles: colorist, inker, letterer, cover, editor
     for (let entry of booksMetadata.authors) {
       if (entry.role === "writer") {
         authors.push(entry.name)
@@ -131,11 +193,10 @@ export class Komga extends Source {
 
     const komgaAPI = await this.getKomgaAPI()
 
-    let request = createRequestObject({
+    const request = createRequestObject({
       url: `${komgaAPI}/series/${mangaId}/books`,
       param: "?unpaged=true&media_status=READY",
       method: "GET",
-      headers: {authorization: await this.getAuthorizationString()}
     })
 
     const response = await this.requestManager.schedule(request, 1)
@@ -143,14 +204,22 @@ export class Komga extends Source {
     
     let chapters: Chapter[] = []
 
+    // Chapters language is only available on the serie page
+    const requestSerie = createRequestObject({
+      url: `${komgaAPI}/series/${mangaId}/`,
+      method: "GET",
+    })
+    const responseSerie = await this.requestManager.schedule(requestSerie, 1)
+    const resultSerie = typeof responseSerie.data === "string" ? JSON.parse(responseSerie.data) : responseSerie.data
+    const languageCode = reverseLangCode[resultSerie.metadata.language] ?? reverseLangCode['_unknown']
+
     for (let book of result.content) {
       chapters.push(
         createChapter({
           id: book.id,
           mangaId: mangaId,
           chapNum: book.metadata.numberSort,
-          // TODO: langCode
-          langCode: LanguageCode.ENGLISH,
+          langCode: languageCode,
           name: `${book.metadata.number} - ${book.metadata.title} (${book.size})`,          
           time: new Date(book.fileLastModified),
         })
@@ -163,12 +232,10 @@ export class Komga extends Source {
   async getChapterDetails(mangaId: string, chapterId: string): Promise<ChapterDetails> {
 
     const komgaAPI = await this.getKomgaAPI()
-    const authorizationString = await this.getAuthorizationString()
 
     const request = createRequestObject({
       url: `${komgaAPI}/books/${chapterId}/pages`,
       method: "GET",
-      headers: {authorization: authorizationString}
     })
 
     const data = await this.requestManager.schedule(request, 1)
@@ -185,10 +252,9 @@ export class Komga extends Source {
     }
     
     // Determine the preferred reading direction which is only available in the serie metadata
-    let serieRequest = createRequestObject({
+    const serieRequest = createRequestObject({
       url: `${komgaAPI}/series/${mangaId}/`,
       method: "GET",
-      headers: {authorization: authorizationString}
     })
 
     const serieResponse = await this.requestManager.schedule(serieRequest, 1)
@@ -216,7 +282,7 @@ export class Komga extends Source {
     let paramsList = [`page=${page}`, `size=${PAGE_SIZE}`]
 
     if (searchQuery.title !== undefined) {
-      paramsList.push("search=" + searchQuery.title.replace(" ", "%20"))
+      paramsList.push("search=" + encodeURIComponent(searchQuery.title))
     }
     /*
     if (query.status !== undefined) {
@@ -233,12 +299,11 @@ export class Komga extends Source {
       url: `${komgaAPI}/series`,
       method: "GET",
       param: paramsString,
-      headers: {authorization: await this.getAuthorizationString()}
     })
 
     const data = await this.requestManager.schedule(request, 1)
 
-    let result = typeof data.data === "string" ? JSON.parse(data.data) : data.data
+    const result = typeof data.data === "string" ? JSON.parse(data.data) : data.data
 
     let tiles = []
     for (let serie of result.content) {
@@ -262,47 +327,36 @@ export class Komga extends Source {
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
     
     const komgaAPI = await this.getKomgaAPI()
-    const authorizationString = await this.getAuthorizationString()
 
+    // The source define two homepage sections: new and latest
     const sections = [
-      {
-        request: createRequestObject({
-          url: `${komgaAPI}/series/new`,
-          param: "?page=0&size=20",
-          method: "GET",
-          headers: {authorization: authorizationString}
-        }),
-        section: createHomeSection({
-            id: 'new',
-            title: 'Recently added series',
-            view_more: true,
-        }),
-    },
-    {
-      request: createRequestObject({
-        url: `${komgaAPI}/series/updated`,
+      createHomeSection({
+        id: 'new',
+        title: 'Recently added series',
+        view_more: true,
+      }),
+      createHomeSection({
+        id: 'updated',
+        title: 'Recently updated series',
+        view_more: true,
+      }),
+    ]
+
+    const promises: Promise<void>[] = []
+
+    for (const section of sections) {
+      // Let the app load empty tagSections
+      sectionCallback(section)
+
+      const request = createRequestObject({
+        url: `${komgaAPI}/series/${section.id}`,
         param: "?page=0&size=20",
         method: "GET",
-        headers: {authorization: authorizationString}
-      }),
-      section: createHomeSection({
-          id: 'updated',
-          title: 'Recently updated series',
-          view_more: true,
-      }),
-  },
-  ]
-
-  const promises: Promise<void>[] = []
-
-  for (const section of sections) {
-      // Let the app load empty tagSections
-      sectionCallback(section.section)
+      })
 
       // Get the section data
       promises.push(
-          this.requestManager.schedule(section.request, 1).then(data => {
-              
+          this.requestManager.schedule(request, 1).then(data => {
             let result = typeof data.data === "string" ? JSON.parse(data.data) : data.data
 
             let tiles = []
@@ -314,27 +368,25 @@ export class Komga extends Source {
                 subtitleText: createIconText({ text: "id: " + serie.id }),
               }))
             }
-            section.section.items = tiles
-            sectionCallback(section.section)
+            section.items = tiles
+            sectionCallback(section)
           }),
       )
+    }
+
+    // Make sure the function completes
+    await Promise.all(promises)
   }
 
-  // Make sure the function completes
-  await Promise.all(promises)
-  }
-
-  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults> {
 
     const komgaAPI = await this.getKomgaAPI()
-    const authorizationString = await this.getAuthorizationString()
     let page: number = metadata?.page ?? 0
 
     const request = createRequestObject({
       url: `${komgaAPI}/series/${homepageSectionId}`,
       param: `?page=${page}&size=${PAGE_SIZE}`,
       method: "GET",
-      headers: {authorization: authorizationString},
     })
 
     const data = await this.requestManager.schedule(request, 1)
@@ -362,7 +414,6 @@ export class Komga extends Source {
   async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
 
     const komgaAPI = await this.getKomgaAPI()
-    const authorizationString = await this.getAuthorizationString()
 
     // We make requests of PAGE_SIZE titles to `series/updated/` until we got every titles 
     // or we got a title which `lastModified` metadata is older than `time`
@@ -376,7 +427,6 @@ export class Komga extends Source {
         url: `${komgaAPI}/series/updated/`,
         param: `?page=${page}&size=${PAGE_SIZE}`,
         method: "GET",
-        headers: {authorization: authorizationString}
       })
 
       const data = await this.requestManager.schedule(request, 1)
@@ -409,7 +459,6 @@ export class Komga extends Source {
         }))
       }
     }
-
   }
 
   /*
@@ -461,6 +510,51 @@ export class Komga extends Source {
     Object.keys(form).forEach(key => {
       promises.push(this.stateManager.store(key, form[key]))
     })
+
+    const authorization = this.createAuthorizationString(form["serverUsername"], form["serverPassword"])
+    const komgaAPI = this.createKomgaAPI(form["serverAddress"])
+
+    // To test these information, we try to make a connection to the server
+    // We could use a better endpoint to test the connection
+    let request = createRequestObject({
+      url: `${komgaAPI}/series/`,
+      param: "?size=1", // We don't want the server to send to many results
+      method: "GET",
+      incognito: true, // We don't want the authorization to be cached
+      headers: {authorization: authorization}
+    })
+
+    var responseStatus = undefined
+
+    try {
+      const response = await this.requestManager.schedule(request, 1)
+      responseStatus = response.status
+    } catch (error) {
+      // If the server is unavailable error.message will be 'AsyncOperationTimedOutError'
+      throw new Error(`Could not connect to server: ${error.message}`)
+    }
+    
+    switch(responseStatus) { 
+      case 200: {
+        // Successful connection
+        break
+      }
+      case 401: {
+        throw new Error("401 Unauthorized: Invalid credentials")
+      }
+      default: {
+        throw new Error(`Connection failed with status code ${responseStatus}`)
+      }
+    }
+
+    // We only want to save the info submerged if the request was successful
+
+    promises.push(this.stateManager.store("serverAddress", form["serverAddress"]))
+    promises.push(this.stateManager.store("serverUsername", form["serverUsername"]))
+    promises.push(this.stateManager.store("serverPassword", form["serverPassword"]))
+    // We save the authorization string and api url to not have to generate it for every request
+    promises.push(this.stateManager.store("authorization", authorization))
+    promises.push(this.stateManager.store("komgaAPI", komgaAPI))
 
     await Promise.all(promises)
   }
