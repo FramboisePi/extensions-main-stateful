@@ -8,13 +8,9 @@ import {
   MangaStatus,
   MangaUpdates,
   PagedResults,
-  FormObject,
   SourceInfo,
   TagSection,
-  UserForm,
   MangaTile,
-  SourceMenu,
-  SourceMenuItemType,
   TagType,
   ContentRating,
   RequestInterceptor,
@@ -66,7 +62,7 @@ export class KomgaRequestInterceptor implements RequestInterceptor {
   stateManager = createSourceStateManager({})
 
   async getAuthorizationString(): Promise<string>{    
-    const authorizationString = await this.stateManager.retrieve("authorization")
+    const authorizationString = await this.stateManager.retrieve("authorization") as string
 
     if (authorizationString === null) {
       throw new Error("Unset credentials in source settings")
@@ -109,7 +105,7 @@ export class Komga extends Source {
   }
 
   async getAuthorizationString(): Promise<string>{
-    const authorizationString = await this.stateManager.retrieve("authorization")
+    const authorizationString = await this.stateManager.retrieve("authorization") as string
 
     if (authorizationString === null) {
       throw new Error("Unset credentials in source settings")
@@ -118,7 +114,7 @@ export class Komga extends Source {
   }
 
   async getKomgaAPI(): Promise<string>{
-    const komgaAPI = await this.stateManager.retrieve("komgaAPI")
+    const komgaAPI = await this.stateManager.retrieve("komgaAPI") as string
 
     if (komgaAPI === null) {
       throw new Error("Unset server URL in source settings")
@@ -467,95 +463,4 @@ export class Komga extends Source {
   }
   */
 
-  async getSourceMenu(): Promise<SourceMenu> {
-    return Promise.resolve(createSourceMenu({
-       items: [
-         createSourceMenuItem({
-           id: "serverSettings",
-           label: "Server Settings",
-           type: SourceMenuItemType.FORM
-         })
-       ]
-    }))
-  }
-
-  async getSourceMenuItemForm(itemId: string): Promise<UserForm> {
-    let objects: FormObject[] = [
-      createTextFieldObject({
-        id: 'serverAddress',
-        label: 'Server URL',
-        placeholderText: 'http://127.0.0.1:8080',
-        value: await this.stateManager.retrieve('serverAddress')
-      }),
-      createTextFieldObject({
-        id: 'serverUsername',
-        label: 'Username',
-        placeholderText: 'AnimeLover420',
-        value: await this.stateManager.retrieve('serverUsername')
-      }),
-      createTextFieldObject({
-        id: 'serverPassword',
-        label: 'Password',
-        placeholderText: 'Some Super Secret Password',
-        value: await this.stateManager.retrieve('serverPassword')
-      })
-    ]
-
-    return createUserForm({formElements: objects})
-  }
-
-  async submitSourceMenuItemForm(itemId: string, form: any) {
-    var promises: Promise<void>[] = []
-
-    Object.keys(form).forEach(key => {
-      promises.push(this.stateManager.store(key, form[key]))
-    })
-
-    const authorization = this.createAuthorizationString(form["serverUsername"], form["serverPassword"])
-    const komgaAPI = this.createKomgaAPI(form["serverAddress"])
-
-    // To test these information, we try to make a connection to the server
-    // We could use a better endpoint to test the connection
-    let request = createRequestObject({
-      url: `${komgaAPI}/series/`,
-      param: "?size=1", // We don't want the server to send to many results
-      method: "GET",
-      incognito: true, // We don't want the authorization to be cached
-      headers: {authorization: authorization}
-    })
-
-    var responseStatus = undefined
-
-    try {
-      const response = await this.requestManager.schedule(request, 1)
-      responseStatus = response.status
-    } catch (error) {
-      // If the server is unavailable error.message will be 'AsyncOperationTimedOutError'
-      throw new Error(`Could not connect to server: ${error.message}`)
-    }
-    
-    switch(responseStatus) { 
-      case 200: {
-        // Successful connection
-        break
-      }
-      case 401: {
-        throw new Error("401 Unauthorized: Invalid credentials")
-      }
-      default: {
-        throw new Error(`Connection failed with status code ${responseStatus}`)
-      }
-    }
-
-    // We only want to save the info submerged if the request was successful
-
-    promises.push(this.stateManager.store("serverAddress", form["serverAddress"]))
-    promises.push(this.stateManager.store("serverUsername", form["serverUsername"]))
-    promises.push(this.stateManager.store("serverPassword", form["serverPassword"]))
-    // We save the authorization string and api url to not have to generate it for every request
-    promises.push(this.stateManager.store("authorization", authorization))
-    promises.push(this.stateManager.store("komgaAPI", komgaAPI))
-
-    await Promise.all(promises)
-  }
 }
