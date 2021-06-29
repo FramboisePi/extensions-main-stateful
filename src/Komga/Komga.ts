@@ -338,7 +338,20 @@ export class Komga extends Source {
 
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
     
-    const komgaAPI = await this.getKomgaAPI()
+    // We won't use `await this.getKomgaAPI()` as we do not want to throw an error on
+    // the homepage when server settings are not set
+    const komgaAPI = await this.stateManager.retrieve("komgaAPI")
+
+    if (komgaAPI === null) {
+      // Server settings unset in source settings
+      const section = createHomeSection({
+        id: 'unset',
+        title: 'Server settings unset in source settings',
+        view_more: false,
+      })
+      sectionCallback(section)
+      return
+    }
 
     // The source define two homepage sections: new and latest
     const sections = [
