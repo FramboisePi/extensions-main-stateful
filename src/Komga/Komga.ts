@@ -20,6 +20,11 @@ import {
 
 import {reverseLangCode} from "./Languages"
 
+import {
+  serverSettingsMenu,
+  testServerSettingsMenu
+} from './KomgaSettings'
+
 export const KomgaInfo: SourceInfo = {
   version: "1.1.3",
   name: "Komga",
@@ -128,6 +133,17 @@ export class Komga extends Source {
     requestsPerSecond: 4,
     interceptor: new KomgaRequestInterceptor()
   })
+
+  override async getSourceMenu(): Promise<Section> {
+    return Promise.resolve(createSection({
+        id: 'main',
+        header: 'Source Settings',
+        rows: () => Promise.resolve([
+          serverSettingsMenu(this.stateManager),
+          testServerSettingsMenu(this.stateManager, this.requestManager),
+        ])
+    }))
+  }
 
   async getMangaDetails(mangaId: string): Promise<Manga> {
     /*
